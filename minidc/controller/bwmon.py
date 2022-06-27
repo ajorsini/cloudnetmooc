@@ -132,7 +132,7 @@ class BandwidthMonitor(app_manager.RyuApp):
         for stat in body:
             totalDropped += stat.tx_dropped
             totalDropped += stat.rx_dropped
-        self.bwstats.addDroppedPktStat(name, totalDropped)
+        self.bwstats.addDroppedPktStat(swName, totalDropped)
 
         # ASSIGNMENT 2:
         # If the switch reporting the statistic is an edge switch, and the
@@ -142,9 +142,11 @@ class BandwidthMonitor(app_manager.RyuApp):
         #  self.topo.ports[switch name][port number])
 
         # [ ADD YOUR CODE HERE ]
-        for stat in body:
-            devName = self.topo.ports[swName][stat.port_no]
-            self.bwstats.addHostBwStat(devName, stat.tx_bytes, stat.rx_bytes)
+        if swName in self.topo.edgeSwitches:
+            for stat in body:
+                devName = self.topo.ports[swName][stat.port_no]
+                if devName in self.topo.hosts:
+                    self.bwstats.addHostBwStat(devName, stat.tx_bytes, stat.rx_bytes)
 
         # periodically print tenant bandwidth usage
         self.statsReplied += 1
