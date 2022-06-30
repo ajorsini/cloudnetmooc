@@ -173,6 +173,20 @@ class StaticPolicy(object):
         #   (Hint: to find a the VLAN, use topo.getVlanCore(vlanId))
 
         # [ADD YOUR CODE HERE]
+        for edge in topo.EdgeSwitches.values():
+            routingTable[edge.dpid] = []
+            for h in topo.hosts.values():
+                if h.name in edge.neighbors:
+                    outport = topo.ports[edge.name][h.name]
+                else:
+                    core = topo.getVlanCore(h.vlans[0])
+                    outport = topo.ports[edge.name][core.name]
+                routingTable[core.dpid].append({
+                    'eth_dst' : h.eth,
+                    'output' : [outport],
+                    'priority' : 2,
+                    'type' : 'dst'
+                })
 
         return flood.add_arpflood(routingTable, topo)
 
